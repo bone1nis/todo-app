@@ -11,7 +11,7 @@ const TaskItem: React.FC<{ task: Task }> = ({ task }) => {
         <Box width="100%">
             <Stack direction="row" gap={2}>
                 <Checkbox checked={task.completed} onChange={() => toggleTask(task.id)} />
-                <Typography variant="h5" gutterBottom>
+                <Typography variant="h5" gutterBottom sx={{ wordBreak: "break-all" }}>
                     {task.text}
                 </Typography>
             </Stack>

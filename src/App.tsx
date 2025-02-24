@@ -17,7 +17,7 @@ const App: React.FC = () => {
         <Stack alignItems="center" gap={2} marginTop={10}>
           <AddTask />
           <TaskList />
-          <Stack direction="row" gap={4} alignItems="center">
+          <Stack direction={{ xs: "column", sm: "row" }} gap={4} alignItems="center">
             <TaskClearCompleted />
             <TaskCounter />
             <TaskFilters />
