@@ -17,7 +17,7 @@ npm i
 ### Running a project locally
 
 ```
-npm run dev
+npm run start
 ```
 
 ### Build a project
