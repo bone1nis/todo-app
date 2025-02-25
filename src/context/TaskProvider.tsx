@@ -10,7 +10,7 @@ const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [filter, setFilter] = useState<FilterType>("all");
 
     const addTask = (text: string) => {
-        setTasks(prev => [...prev, { id: crypto.randomUUID(), text, completed: false }]);
+        setTasks(prev => [...prev, { id: Date.now().toString(), text, completed: false }]);
     };
 
     const toggleTask = (id: string) => {

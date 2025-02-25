@@ -1,27 +1,18 @@
 import "@testing-library/jest-dom";
 import { fireEvent, render, screen } from "@testing-library/react";
+
 import AddTask from "../components/AddTask";
-import { TaskContext, TaskContextType } from "../context/TaskContext";
+import TaskProvider from "../context/TaskProvider";
+import TaskList from "../components/TaskList";
 
-const createMockContext = (overrides: Partial<TaskContextType> = {}): TaskContextType => ({
-  tasks: [],
-  activeTasks: 0,
-  addTask: jest.fn(),
-  toggleTask: jest.fn(),
-  removeCompleted: jest.fn(),
-  filter: "all",
-  setFilter: jest.fn(),
-  ...overrides,
-});
 
-describe("AddTask Component", () => {
-  test("should call addTask with correct text when form is submitted", () => {
-    const mockContextValue = createMockContext();
-
-    render(
-      <TaskContext.Provider value={mockContextValue}>
+describe("TaskProvider", () => {
+  test("should add a task with correct text when the form is submitted", async () => {
+    const { rerender } = render(
+      <TaskProvider>
         <AddTask />
-      </TaskContext.Provider>
+        <TaskList />
+      </TaskProvider>
     );
 
     const input = screen.getByLabelText("Add Task");
@@ -30,25 +21,31 @@ describe("AddTask Component", () => {
     fireEvent.change(input, { target: { value: "New Task" } });
     fireEvent.click(button);
 
-    expect(mockContextValue.addTask).toHaveBeenCalledWith("New Task");
-  });
-
-  test("does not call addTask if input is empty", () => {
-    const addTaskMock = jest.fn();
-    const mockContextValue = createMockContext({ addTask: addTaskMock });
-
-    render(
-      <TaskContext.Provider value={mockContextValue}>
+    rerender(
+      <TaskProvider>
         <AddTask />
-      </TaskContext.Provider>
+        <TaskList />
+      </TaskProvider>
+    );
+
+    const task = await screen.findByText("New Task");
+
+    expect(task).toBeInTheDocument();
+  });
+  test("should does not add a task if input is empty", () => {
+    render(
+      <TaskProvider>
+        <AddTask />
+        <TaskList />
+      </TaskProvider>
     );
 
     const input = screen.getByLabelText("Add Task");
     const button = screen.getByRole("button", { name: "Add" });
 
-    expect(input).toHaveValue("");
+    fireEvent.change(input, { target: { value: "" } });
     fireEvent.click(button);
 
-    expect(addTaskMock).not.toHaveBeenCalled();
+    expect(screen.queryByText("New Task")).toBeNull();
   });
 });

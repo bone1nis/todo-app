@@ -1,68 +1,55 @@
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
+
+import AddTask from "../components/AddTask";
+import TaskList from "../components/TaskList";
+import TaskProvider from "../context/TaskProvider";
 import TaskFilters from "../components/TaskFilters";
-import { TaskContext, TaskContextType } from "../context/TaskContext";
 
-const createMockContext = (overrides: Partial<TaskContextType> = {}): TaskContextType => ({
-    tasks: [],
-    activeTasks: 0,
-    addTask: jest.fn(),
-    toggleTask: jest.fn(),
-    removeCompleted: jest.fn(),
-    filter: "all",
-    setFilter: jest.fn(),
-    ...overrides,
-});
-
-describe("TaskFilters Component", () => {
-    test("should update filter when 'All' button is clicked", () => {
-        const setFilterMock = jest.fn();
-        const mockContextValue = createMockContext({ filter: "active", setFilter: setFilterMock });
-
+describe("TaskFilters", () => {
+    let input: HTMLElement;
+    let addButton: HTMLElement;
+    
+    beforeEach(() => {
         render(
-            <TaskContext.Provider value={mockContextValue}>
+            <TaskProvider>
+                <AddTask />
+                <TaskList />
                 <TaskFilters />
-            </TaskContext.Provider>
+            </TaskProvider>
         );
 
-        const allButton = screen.getByRole("button", { name: "All" });
+        input = screen.getByLabelText("Add Task");
+        addButton = screen.getByRole("button", { name: "Add" });
 
-        fireEvent.click(allButton);
+        fireEvent.change(input, { target: { value: "Active Task" } });
+        fireEvent.click(addButton);
 
-        expect(setFilterMock).toHaveBeenCalledWith("all");
+        fireEvent.change(input, { target: { value: "Completed Task" } });
+        fireEvent.click(addButton);
+
+        const checkboxes = screen.getAllByRole("checkbox");
+        fireEvent.click(checkboxes[1]);
     });
 
-    test("should update filter when 'Active' button is clicked", () => {
-        const setFilterMock = jest.fn();
-        const mockContextValue = createMockContext({ filter: "completed", setFilter: setFilterMock });
+    test("should change on filter all", async () => {
+        fireEvent.click(screen.getByRole("button", { name: "All" }));
 
-        render(
-            <TaskContext.Provider value={mockContextValue}>
-                <TaskFilters />
-            </TaskContext.Provider>
-        );
-
-        const activeButton = screen.getByRole("button", { name: "Active" });
-
-        fireEvent.click(activeButton);
-
-        expect(setFilterMock).toHaveBeenCalledWith("active");
+        expect(await screen.findByText("Active Task")).toBeInTheDocument();
+        expect(await screen.findByText("Completed Task")).toBeInTheDocument();
     });
 
-    test("should update filter when 'Completed' button is clicked", () => {
-        const setFilterMock = jest.fn();
-        const mockContextValue = createMockContext({ filter: "all", setFilter: setFilterMock });
+    test("should change on filter active", async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Active" }));
 
-        render(
-            <TaskContext.Provider value={mockContextValue}>
-                <TaskFilters />
-            </TaskContext.Provider>
-        );
+        expect(await screen.findByText("Active Task")).toBeInTheDocument();
+        expect(screen.queryByText("Completed Task")).not.toBeInTheDocument();
+    });
 
-        const completedButton = screen.getByRole("button", { name: "Completed" });
+    test("should change on filter completed", async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Completed" }));
 
-        fireEvent.click(completedButton);
-
-        expect(setFilterMock).toHaveBeenCalledWith("completed");
+        expect(screen.queryByText("Active Task")).not.toBeInTheDocument();
+        expect(await screen.findByText("Completed Task")).toBeInTheDocument();
     });
 });
