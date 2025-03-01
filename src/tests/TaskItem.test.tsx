@@ -2,9 +2,11 @@ import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import TaskItem from "../components/TaskItem";
 import { TaskContext, TaskContextType } from "../context/TaskContext";
 import { Task } from "../type";
+
+import TaskItem from "../components/TaskItem";
+
 
 const createMockContext = (): TaskContextType => ({
     tasks: [],
@@ -16,8 +18,15 @@ const createMockContext = (): TaskContextType => ({
     setFilter: jest.fn()
 });
 
-describe("TaskItem", () => {
+const renderTaskItem = (task: Task, contextValue: TaskContextType) => {
+    return render(
+        <TaskContext.Provider value={contextValue}>
+            <TaskItem task={task} />
+        </TaskContext.Provider>
+    );
+};
 
+describe("TaskItem", () => {
     let mockContextValue: TaskContextType;
 
     beforeEach(() => {
@@ -27,42 +36,38 @@ describe("TaskItem", () => {
     test("should call toggleTask when checkbox is clicked", async () => {
         const task: Task = { id: "id", text: "Test Task", completed: false };
 
-        render(
-            <TaskContext.Provider value={mockContextValue}>
-                <TaskItem task={task} />
-            </TaskContext.Provider>
-        );
+        renderTaskItem(task, mockContextValue);
 
         const checkbox = screen.getByRole("checkbox");
-
         await userEvent.click(checkbox);
 
-        expect(mockContextValue.toggleTask).toHaveBeenCalledWith("id");
+        expect(mockContextValue.toggleTask).toHaveBeenCalledTimes(1);
+        expect(mockContextValue.toggleTask).toHaveBeenCalledWith(task.id);
     });
 
     test("should render completed task correctly", () => {
         const completedTask: Task = { id: "id", text: "Completed Task", completed: true };
 
-        render(
-            <TaskContext.Provider value={mockContextValue}>
-                <TaskItem task={completedTask} />
-            </TaskContext.Provider>
-        );
+        renderTaskItem(completedTask, mockContextValue);
 
-        const checkbox = screen.getByRole("checkbox");
-        expect(checkbox).toBeChecked();
+        expect(screen.getByRole("checkbox")).toBeChecked();
+        expect(screen.getByText(completedTask.text)).toBeInTheDocument();
     });
 
     test("should render active task correctly", () => {
         const activeTask: Task = { id: "id", text: "Active Task", completed: false };
 
-        render(
-            <TaskContext.Provider value={mockContextValue}>
-                <TaskItem task={activeTask} />
-            </TaskContext.Provider>
-        );
+        renderTaskItem(activeTask, mockContextValue);
 
-        const checkbox = screen.getByRole("checkbox");
-        expect(checkbox).not.toBeChecked();
+        expect(screen.getByRole("checkbox")).not.toBeChecked();
+        expect(screen.getByText(activeTask.text)).toBeInTheDocument();
+    });
+
+    test("should display correct task text", () => {
+        const task: Task = { id: "id", text: "Some Task", completed: false };
+
+        renderTaskItem(task, mockContextValue);
+
+        expect(screen.getByText(task.text)).toBeInTheDocument();
     });
 });
