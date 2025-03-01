@@ -8,7 +8,7 @@ const TaskItem: React.FC<{ task: Task }> = ({ task }) => {
     const { toggleTask } = useTaskContext();
 
     return (
-        <Box width="100%">
+        <Box width="100%" data-testid="task-item">
             <Stack direction="row" gap={2}>
                 <Checkbox checked={task.completed} onChange={() => toggleTask(task.id)} />
                 <Typography variant="h5" gutterBottom sx={{ wordBreak: "break-all" }}>

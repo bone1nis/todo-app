@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import TaskItem from "../components/TaskItem";
 import { TaskContext, TaskContextType } from "../context/TaskContext";
@@ -23,7 +24,7 @@ describe("TaskItem", () => {
         mockContextValue = createMockContext();
     });
 
-    test("should call toggleTask when checkbox is clicked", () => {
+    test("should call toggleTask when checkbox is clicked", async () => {
         const task: Task = { id: "id", text: "Test Task", completed: false };
 
         render(
@@ -34,7 +35,7 @@ describe("TaskItem", () => {
 
         const checkbox = screen.getByRole("checkbox");
 
-        fireEvent.click(checkbox);
+        await userEvent.click(checkbox);
 
         expect(mockContextValue.toggleTask).toHaveBeenCalledWith("id");
     });
