@@ -1,4 +1,4 @@
-describe('Todo app', () => {
+describe('main test', () => {
   beforeEach(() => {
     cy.visit('http://localhost:5173/todo-app');
   });
